@@ -21,6 +21,24 @@ GitHub's [private vulnerability reporting](../../security/advisories/new).
 | Binárka | Electron Fuses: vypnuté `RunAsNode`, `NODE_OPTIONS`, `--inspect`; overovanie integrity ASAR. |
 | Závislosti | Dependabot, CodeQL, `npm audit` v CI; inštalačné skripty balíkov povolené len pre schválený zoznam (`allowScripts`). |
 
+## Poznámka k `overrides` v `package.json`
+
+`nanoid`, `lodash-es`, `mysql2` a `deepmerge-ts` sú tranzitívne závislosti
+(nie priamo použité v appke) s nahlásenými zraniteľnosťami:
+
+- `mysql2` a `deepmerge-ts` patria k Prisma CLI (`prisma`) — nástroju len na
+  vývoj (migrácie, generovanie klienta). Bežiaca appka pristupuje k databáze
+  cez `@prisma/adapter-libsql`, `mysql2` sa v nej nikdy nevykoná.
+- `lodash-es` (cez `mysql2`-nesúvisiacu vetvu) a časť `nanoid` patria funkcii
+  Excalidrawu „Mermaid to Excalidraw", ktorú appka v používateľskom rozhraní
+  nikde nesprístupňuje.
+
+Namiesto `npm audit fix --force` (stiahol by `@excalidraw/excalidraw` a
+`prisma` na staré, nekompatibilné verzie) sú tieto balíky pripnuté na
+najnižšiu opravenú verziu cez `overrides`. `nanoid` je pripnutý na `3.3.18`
+(nie na najnovšiu 5.x/6.x) zámerne — tie sú len ESM a rozbili by `require()`
+v PostCSS/Webpacku počas buildu.
+
 ## Podporované verzie
 
 Opravy dostáva vždy len najnovšia verzia.
