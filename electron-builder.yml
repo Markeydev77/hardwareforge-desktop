@@ -1,0 +1,70 @@
+# Balenie Windows instalatora: npm run dist  ->  release/HardwareForge-Setup-<verzia>.exe
+appId: com.hardwareforge.desktop
+productName: HardwareForge
+copyright: Copyright © 2026 HardwareForge contributors
+
+directories:
+  output: release
+  buildResources: build
+
+# app.asar obsahuje LEN hlavny proces Electronu (zbaleny esbuildom).
+# Next.js server ide vedla ako extraResources - potrebuje skutocne subory
+# (natívny modul libsql sa z ASAR nacitat neda).
+files:
+  - dist-electron/**/*
+  - package.json
+  - "!node_modules/**/*"
+extraMetadata:
+  main: dist-electron/main.js
+npmRebuild: false
+
+extraResources:
+  - from: .next/standalone
+    to: server
+    filter:
+      - "**/*"
+      # nikdy nebalit data vyvojara ani ziadne tajomstva
+      - "!.data/**"
+      - "!**/*.db"
+      - "!**/*.db-wal"
+      - "!**/*.db-shm"
+      - "!**/.env*"
+  # .next/static a public su uz v standalone (scripts/clean-standalone.mjs)
+  - from: prisma/migrations
+    to: migrations
+
+asar: true
+# extraResources vynecha node_modules servera - dokopiruje ich tento hook
+afterPack: scripts/after-pack.cjs
+
+# Electron Fuses - vypnute vsetko, co by umoznilo spustit cudzi kod cez nasu binarku
+electronFuses:
+  runAsNode: false
+  enableCookieEncryption: true
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+  loadBrowserProcessSpecificV8Snapshot: false
+  grantFileProtocolExtraPrivileges: false
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.png
+  artifactName: HardwareForge-Setup-${version}.${ext}
+
+nsis:
+  oneClick: false
+  perMachine: false            # instalacia pre pouzivatela - bez admin prav
+  allowElevation: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: HardwareForge
+  deleteAppDataOnUninstall: false   # odinstalovanie NIKDY nemaze projekty pouzivatela
+  runAfterFinish: true
+
+# Appka sa nikam nepublikuje sama - release vytvara GitHub Actions ako koncept
+publish: null

@@ -1,0 +1,307 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Dizajnove tokeny.
+   Tmavy rezim je predvoleny - nie cierna, ale velmi tmava modra.
+   Cierna na OLED posobi ako diera a hrany kariet nie su citatelne.
+------------------------------------------------------------------- */
+
+:root {
+  --bg: #0a0b10;
+  --bg-subtle: #0f1117;
+  --surface: #14161f;
+  --surface-hover: #191c27;
+  --border: #232734;
+  --border-strong: #2f3444;
+  --text: #e8eaf0;
+  --text-muted: #8b91a3;
+  --accent: #7c8cff;
+  --accent-fg: #ffffff;
+  --accent-glow: rgb(124 140 255 / 0.35);
+}
+
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-subtle: #f7f8fa;
+  --surface: #ffffff;
+  --surface-hover: #f4f5f8;
+  --border: #e6e8ec;
+  --border-strong: #d3d7de;
+  --text: #0b0d12;
+  --text-muted: #62697a;
+  --accent: #5b6bf0;
+  --accent-fg: #ffffff;
+  --accent-glow: rgb(91 107 240 / 0.22);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+
+  --radius-card: 0.875rem;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Cisla v tabulkach (ceny, mA, W) musia byt zarovnane pod sebou. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+/* Karta - zakladny stavebny prvok. Hlbka vznika rozdielom bg/surface
+   a 1px orámovaním, nie tazkymi tienmi. */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+
+.card-hover {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.card-hover:hover {
+  border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
+  box-shadow:
+    0 0 0 1px var(--accent-glow),
+    0 12px 32px -12px var(--accent-glow);
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Jemny scrollbar pre horizontalny Kanban */
+.thin-scroll::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-in {
+  animation: fade-up 0.28s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Tlacova verzia = export do PDF cez prehliadac (Ctrl+P > Ulozit ako PDF) */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  :root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --text: #000000;
+    --text-muted: #444444;
+    --border: #cccccc;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .card {
+    break-inside: avoid;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Vykreslenie Markdownu v poznamkach.
+   Rucne styly namiesto @tailwindcss/typography - potrebujeme len
+   zopar prvkov a plugin by pridal zavislost aj vlastnu farebnu schemu.
+------------------------------------------------------------------- */
+
+.markdown {
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+.markdown > * + * {
+  margin-top: 0.85em;
+}
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 1.6em;
+}
+.markdown h1 {
+  font-size: 1.5rem;
+}
+.markdown h2 {
+  font-size: 1.2rem;
+}
+.markdown h3 {
+  font-size: 1rem;
+}
+.markdown a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.markdown ul,
+.markdown ol {
+  padding-left: 1.4em;
+}
+.markdown ul {
+  list-style: disc;
+}
+.markdown ol {
+  list-style: decimal;
+}
+.markdown li::marker {
+  color: var(--text-muted);
+}
+/* GFM checklisty */
+.markdown li:has(input[type="checkbox"]) {
+  list-style: none;
+  margin-left: -1.4em;
+}
+.markdown input[type="checkbox"] {
+  accent-color: var(--accent);
+  margin-right: 0.5em;
+}
+.markdown code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  padding: 0.1em 0.35em;
+}
+.markdown pre {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+.markdown pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+}
+.markdown blockquote {
+  border-left: 3px solid var(--border-strong);
+  padding-left: 1rem;
+  color: var(--text-muted);
+}
+.markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.markdown th,
+.markdown td {
+  border: 1px solid var(--border);
+  padding: 0.45rem 0.7rem;
+  text-align: left;
+}
+.markdown th {
+  background: var(--bg-subtle);
+  font-weight: 600;
+}
+.markdown img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.6rem;
+}
+.markdown hr {
+  border-color: var(--border);
+}
+
+/* Prepinac temy: ikonu vybera CSS podla data-theme, nie React stav. */
+.theme-icon-light {
+  display: none;
+}
+:root[data-theme="light"] .theme-icon-dark {
+  display: none;
+}
+:root[data-theme="light"] .theme-icon-light {
+  display: block;
+}
+
+/* ------------------------------------------------------------------
+   Excalidraw (Mapy). Kniznica si riesi vlastnu tmavu temu cez prop
+   `theme`; tu len dolaisme kontajner a zladenie s appkou.
+------------------------------------------------------------------- */
+.excalidraw {
+  --color-primary: var(--accent);
+  --color-primary-darker: var(--accent);
+  --color-primary-darkest: var(--accent);
+}
+.excalidraw .layer-ui__wrapper {
+  z-index: 5;
+}
+/* nas plavajuci inspektor karty nesmie prekryt hornu listu Excalidrawu */
+.excalidraw-container-inspector {
+  pointer-events: auto;
+}
+
+/*
+ * Vstavane tlacidlo "Vlozit obrazok" (skratka 9). Vypnut ho cez
+ * UIOptions.tools.image by vypolo aj drag&drop a Ctrl+V (Excalidraw ich
+ * riadi jednym spolocnym flagom), preto sa len skryva - nahradza ho
+ * vlastne tlacidlo "Obrazok" v hlavicke editora. Klavesova skratka "9"
+ * je zablokovana samostatne v src/app/layout.tsx.
+ */
+.excalidraw [data-testid="toolbar-image"] {
+  display: none !important;
+}

@@ -1,0 +1,250 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+// Lokalna SQLite databaza v %APPDATA%\HardwareForge (viz src/lib/paths.ts).
+// Cesta sa nastavuje za behu cez adapter v src/lib/db.ts.
+datasource db {
+  provider = "sqlite"
+}
+
+// ---------------------------------------------------------------- enumy
+
+enum ProjectStatus {
+  IDEA
+  PLANNING
+  DEVELOPMENT
+  TESTING
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  WAITING
+  TESTING
+  DONE
+}
+
+enum PartCategory {
+  MCU
+  DISPLAY
+  LED
+  AUDIO
+  SENSOR
+  POWER
+  MECHANICAL
+  CABLE
+  OTHER
+}
+
+enum LinkType {
+  GITHUB
+  YOUTUBE
+  DATASHEET
+  SHOP
+  DOCS
+  INSPIRATION
+  OTHER
+}
+
+enum FileKind {
+  PDF
+  STL
+  STEP
+  SVG
+  IMAGE
+  ARCHIVE
+  CAD
+  OTHER
+}
+
+enum ActivityType {
+  PROJECT_CREATED
+  PROJECT_UPDATED
+  STATUS_CHANGED
+  TASK_CREATED
+  TASK_MOVED
+  TASK_COMPLETED
+  TASK_DELETED
+  PART_ADDED
+  PART_UPDATED
+  PART_REMOVED
+  FILE_UPLOADED
+  FILE_DELETED
+  LINK_ADDED
+  NOTE_UPDATED
+  WHITEBOARD_CREATED
+  WHITEBOARD_DELETED
+}
+
+// ---------------------------------------------------------------- modely
+
+/// Desktop appka pre jedneho pouzivatela - data su na jeho disku,
+/// preto tu nie je model User ani ownerId.
+model Project {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  description String?
+  category    String        @default("Elektronika")
+  status      ProjectStatus @default(IDEA)
+  priority    Priority      @default(MEDIUM)
+  color       String        @default("#7c8cff")
+  dueDate     DateTime?
+  archivedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  tasks       Task[]
+  parts       Part[]
+  files       FileAsset[]
+  links       Link[]
+  notes       Note[]
+  whiteboards Whiteboard[]
+  activity    ActivityLog[]
+
+  @@index([updatedAt(sort: Desc)])
+  @@index([status])
+  @@index([category])
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  priority    Priority   @default(MEDIUM)
+  order       Float
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, status, order])
+}
+
+model Part {
+  id         String       @id @default(cuid())
+  name       String
+  category   PartCategory @default(OTHER)
+  /// Kluc obrazka v lokalnom ulozisku (src/lib/storage.ts), nie URL
+  imageKey   String?
+  quantity   Int          @default(1)
+  /// Peniaze NIKDY ako Float - Decimal drzi presnost aj pri scitani
+  unitPrice  Decimal?
+  shopUrl    String?
+  partNumber String?
+  notes      String?
+  voltage    Decimal?
+  currentMa  Decimal?
+  acquired   Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, category])
+}
+
+model FileAsset {
+  id         String   @id @default(cuid())
+  /// Povodny nazov suboru - len na zobrazenie, do cesty na disku sa nedostane
+  name       String
+  storageKey String   @unique
+  kind       FileKind @default(OTHER)
+  sizeBytes  Int
+  createdAt  DateTime @default(now())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, kind])
+}
+
+model Link {
+  id        String   @id @default(cuid())
+  url       String
+  title     String
+  type      LinkType @default(OTHER)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, type])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  title     String   @default("Nova poznamka")
+  content   String   @default("")
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, updatedAt(sort: Desc)])
+}
+
+model ActivityLog {
+  id        String       @id @default(cuid())
+  type      ActivityType
+  message   String
+  createdAt DateTime     @default(now())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt(sort: Desc)])
+}
+
+/// Volna tabula (whiteboard) - Excalidraw scena. Jeden projekt ma viacero map.
+/// Model sa vola Whiteboard, nie Map - "Map" by kolidoval s JS Map v generovanom klientovi.
+model Whiteboard {
+  id           String   @id @default(cuid())
+  title        String   @default("Nová mapa")
+  elements     Json     @default("[]") // Excalidraw elementy (bez binarnych suborov)
+  appState     Json? // pozadie, mriezka, scrollX/Y, zoom
+  thumbnailKey String? // PNG nahlad v lokalnom ulozisku
+  order        Float    @default(1024)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  projectId String
+  project   Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  files     WhiteboardFile[]
+
+  @@index([projectId, order])
+}
+
+/// Excalidraw fileId -> obrazok v lokalnom ulozisku. dataURL je interne base64,
+/// takze obrazky drzime mimo `elements` a pri otvoreni ich nacitame zo servera.
+model WhiteboardFile {
+  id         String   @id @default(cuid())
+  fileId     String // Excalidraw BinaryFileData.id
+  storageKey String   @unique
+  mimeType   String
+  sizeBytes  Int
+  createdAt  DateTime @default(now())
+
+  whiteboardId String
+  whiteboard   Whiteboard @relation(fields: [whiteboardId], references: [id], onDelete: Cascade)
+
+  @@unique([whiteboardId, fileId])
+}
