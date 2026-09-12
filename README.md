@@ -1,80 +1,89 @@
 # HardwareForge
 
-Plánovanie hardvérových projektov — ESP32, Arduino, 3D tlač, elektronika.
-**Zadarmo, open-source a úplne offline:** všetky projekty, súbory a mapy zostávajú
-len na tvojom počítači. Appka sa nepripája na internet.
+A planner for hardware projects — ESP32, Arduino, 3D printing, electronics.
 
-*Hardware project planner (ESP32, Arduino, 3D printing). Free, open-source and fully
-offline — your data never leaves your computer. English summary below.*
+**Free. Open-source. Fully offline.** Everything you create — projects, files,
+photos, drawings — stays on your own computer. The app never connects to the
+internet, not even to check for updates.
 
-## Čo vie
+## Download
 
-| Sekcia | Obsah |
+1. Go to the **[Releases page](../../releases/latest)**.
+2. Under **Assets**, click **`HardwareForge-Setup-x.y.z.exe`** to download it
+   (the numbers are the version — just click the `.exe` file).
+3. Open the downloaded file.
+4. Windows will show a blue **"Windows protected your PC"** screen. This is
+   normal — it just means the app isn't from a big company that paid for a
+   certificate yet. Click the small **More info** link, then click the
+   **Run anyway** button that appears.
+5. Click through the installer (no admin password needed). When it finishes,
+   HardwareForge opens by itself.
+
+That's it — no account, no sign-up, no credit card, nothing to configure.
+
+## What it does
+
+| Section | What's in it |
 |---|---|
-| **Projekty** | Zoznam, vyhľadávanie (aj bez diakritiky), filtre, archív |
-| **Doska** | Kanban s 5 stĺpcami, drag & drop |
-| **Mapy** | Voľná tabuľa — kreslenie, obrázky, predlohy, prepojené úlohy a súčiastky. Export PNG/SVG/PDF |
-| **Súčiastky** | Cena, počet, obchod, obrázok. Celková cena a odhad spotreby po napäťových vetvách |
-| **Súbory** | PDF, STL, STEP, SVG, obrázky, ZIP, Fusion 360 — do 100 MB |
-| **Odkazy, Poznámky** | Datasheety, GitHub, e-shopy; Markdown s checklistami a kódom |
-| **Časová os** | História všetkých zmien |
+| **Projects** | A list of all your projects, with search and filters |
+| **Board** | A Kanban board (drag cards between To Do / In Progress / Done...) |
+| **Maps** | A free-form canvas for sketches, wiring diagrams, and photos |
+| **Parts** | Track components, prices, and links to the shop you bought them from |
+| **Files** | Store PDFs, STL/STEP 3D models, images, ZIPs — up to 100 MB each |
+| **Links, Notes** | Save datasheets and websites; write notes with checklists |
+| **Timeline** | See the full history of everything you changed |
 
-Navyše export projektu do PDF, nákupný zoznam (CSV pre Excel), tmavý/svetlý režim.
+Also included: export a project as a PDF, export a shopping list as a
+spreadsheet (CSV), and a light/dark theme.
 
-## Inštalácia (Windows)
+## Where is my data?
 
-1. Stiahni `HardwareForge-Setup-x.y.z.exe` zo stránky [Releases](../../releases/latest).
-2. Spusti ho. Inštalácia nepotrebuje administrátorské práva.
-3. **Windows môže zobraziť „Windows chránil váš počítač“.** Je to preto, že inštalátor
-   zatiaľ nie je podpísaný plateným certifikátom. Klikni na **Ďalšie informácie →
-   Spustiť aj tak.**
+Everything is saved in one folder on your computer:
+`%APPDATA%\HardwareForge\data\`
 
-Chceš si overiť, že súbor nikto nezmenil? Porovnaj jeho SHA-256 so súborom
-`SHA256SUMS.txt` pri vydaní:
+Inside the app, click **File → Open Data Folder** to open it directly.
 
-```powershell
-Get-FileHash .\HardwareForge-Setup-0.1.0.exe -Algorithm SHA256
-```
+- **Back up your data:** **File → Back Up Data…** This saves everything into
+  a single `.zip` file. Keep a copy somewhere else too (a USB stick, a cloud
+  drive) in case your computer breaks.
+- **Restore from a backup:** **File → Restore from Backup…** Your current
+  data is not deleted — it's moved aside first, just in case.
+- **Uninstalling the app does NOT delete your data.** Your projects stay on
+  your computer even after uninstalling. Delete the folder above yourself if
+  you want to remove them too.
 
-## Kde sú moje dáta
+## Updates
 
-`%APPDATA%\HardwareForge\data\` — databáza (`hardwareforge.db`) a nahraté súbory (`files\`).
-V appke: **Súbor → Otvoriť priečinok s dátami.**
+HardwareForge never goes online by itself, so it can't check for updates
+automatically. To get a newer version: download it from the
+[Releases page](../../releases/latest) and install it the same way as before
+— your existing projects are kept.
 
-- **Záloha:** Súbor → Zálohovať dáta… (jeden ZIP súbor). Odlož ho mimo počítača.
-- **Obnova:** Súbor → Obnoviť zo zálohy… Súčasné dáta sa nemažú, presunú sa vedľa.
-- **Pred každou aktualizáciou** si appka sama zálohuje databázu do `data\backups\`.
-- **Odinštalovanie dáta nemaže.** Ak ich chceš zmazať, vymaž priečinok ručne.
+## Is it safe?
 
-## Aktualizácie
+Yes. There are no accounts, no ads, no analytics, and no tracking of any
+kind. The app is blocked from making any internet connection at all — it
+technically cannot send your data anywhere. Full technical details are in
+[SECURITY.md](SECURITY.md).
 
-Appka sa nikdy sama nepripája na internet, preto ani nekontroluje nové verzie.
-Novú verziu stiahni zo stránky Releases a nainštaluj cez starú — dáta zostanú.
+## Questions or problems?
 
-## Súkromie a bezpečnosť
-
-Žiadne účty, žiadna analytika, žiadne sledovanie. Podrobnosti v [SECURITY.md](SECURITY.md).
+Open an [issue](../../issues) and describe what happened — screenshots help.
 
 ---
 
-## English
-
-- Download the installer from [Releases](../../releases/latest). If SmartScreen warns,
-  click **More info → Run anyway** (the installer is not code-signed yet).
-- Data lives in `%APPDATA%\HardwareForge\data\`. Use **File → Back up data…** regularly.
-- The app never connects to the internet. Updates are manual.
-
-## Vývoj / Development
+## For developers
 
 ```bash
-npm install          # závislosti + Prisma klient + fonty editora
-npm run dev          # appka v prehliadači na http://127.0.0.1:3000 (dáta v ./.data)
-npm test             # unit + integračné testy
-npm run electron     # appka v okne Electronu
-npm run dist         # inštalátor do release/
+npm install       # installs dependencies + Prisma client + editor fonts
+npm run dev       # runs the app in a browser at http://127.0.0.1:3000 (data in ./.data)
+npm test          # unit + integration tests
+npm run electron  # runs the app in an Electron window
+npm run dist       # builds the Windows installer into release/
 ```
 
-Zmena databázy: uprav `prisma/schema.prisma`, potom `npm run db:migration -- nazov_zmeny`.
-Appka novú migráciu aplikuje pri ďalšom štarte (predtým zálohuje databázu).
+To change the database schema: edit `prisma/schema.prisma`, then run
+`npm run db:migration -- name_of_change`. The app applies new migrations
+automatically on next launch (backing up the database first).
 
-Licencia: [MIT](LICENSE).
+License: [MIT](LICENSE).
