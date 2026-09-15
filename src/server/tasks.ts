@@ -6,18 +6,11 @@ import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { computeOrder, needsRebalance, ORDER_STEP } from "@/lib/ordering";
 import { logActivity } from "./activity";
+import { projectSlug as slugOf } from "./queries";
 import { TASK_STATUS } from "@/lib/constants";
 
 const taskStatusEnum = z.enum(["TODO", "IN_PROGRESS", "WAITING", "TESTING", "DONE"]);
 const priorityEnum = z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]);
-
-async function slugOf(projectId: string) {
-  const p = await db.project.findUniqueOrThrow({
-    where: { id: projectId },
-    select: { slug: true },
-  });
-  return p.slug;
-}
 
 export async function createTask(projectId: string, formData: FormData) {
   await requireAuth();

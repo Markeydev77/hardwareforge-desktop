@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { removeKeys } from "@/lib/storage";
 import { logActivity } from "./activity";
+import { projectSlug as slugOfProject } from "./queries";
 import { moveTask } from "./tasks";
 import { togglePartAcquired } from "./parts";
 
@@ -15,14 +16,6 @@ const priorityEnum = z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]);
 
 // Excalidraw scena vie narast (vela tvarov) - strop drzi DB aj payload rozumny.
 const MAX_SCENE_BYTES = 5 * 1024 * 1024;
-
-async function slugOfProject(projectId: string) {
-  const p = await db.project.findUniqueOrThrow({
-    where: { id: projectId },
-    select: { slug: true },
-  });
-  return p.slug;
-}
 
 async function boardContext(whiteboardId: string) {
   const wb = await db.whiteboard.findUniqueOrThrow({

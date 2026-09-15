@@ -34,6 +34,15 @@ export type DashboardFilters = {
   archived?: boolean;
 };
 
+/** Slug projektu podla id - pre revalidatePath/redirect po mutaciach v server actions. */
+export async function projectSlug(projectId: string): Promise<string> {
+  const p = await db.project.findUniqueOrThrow({
+    where: { id: projectId },
+    select: { slug: true },
+  });
+  return p.slug;
+}
+
 export const getProjects = cache(async (f: DashboardFilters) => {
   const where: Prisma.ProjectWhereInput = {
     archivedAt: f.archived ? { not: null } : null,

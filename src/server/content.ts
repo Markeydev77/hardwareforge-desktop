@@ -7,6 +7,7 @@ import { requireAuth } from "@/lib/auth";
 import { guessLinkType } from "@/lib/constants";
 import { removeKeys } from "@/lib/storage";
 import { logActivity } from "./activity";
+import { projectSlug as slugOf } from "./queries";
 
 const linkTypeEnum = z.enum([
   "GITHUB",
@@ -17,14 +18,6 @@ const linkTypeEnum = z.enum([
   "INSPIRATION",
   "OTHER",
 ]);
-
-async function slugOf(projectId: string) {
-  const p = await db.project.findUniqueOrThrow({
-    where: { id: projectId },
-    select: { slug: true },
-  });
-  return p.slug;
-}
 
 // ------------------------------------------------------------------ odkazy
 

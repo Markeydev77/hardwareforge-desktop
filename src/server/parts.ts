@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { IMAGE_MIME_EXT, newKey, removeKeys, saveBuffer } from "@/lib/storage";
 import { logActivity } from "./activity";
+import { projectSlug as slugOf } from "./queries";
 
 const MAX_PART_IMAGE = 5 * 1024 * 1024;
 // SVG zamerne nie - obrazok suciastky je vzdy fotka, SVG by bol zbytocny risk (skripty)
@@ -52,14 +53,6 @@ function optionalUrl(value: FormDataEntryValue | null): string | null {
   } catch {
     return null;
   }
-}
-
-async function slugOf(projectId: string) {
-  const p = await db.project.findUniqueOrThrow({
-    where: { id: projectId },
-    select: { slug: true },
-  });
-  return p.slug;
 }
 
 function readForm(formData: FormData) {
