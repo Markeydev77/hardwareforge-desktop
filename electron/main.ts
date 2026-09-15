@@ -73,6 +73,16 @@ function freePort(): Promise<number> {
   });
 }
 
+/**
+ * Priecinok Dokumenty pre ulozenie zaloh a PDF. Ak je presmerovany na OneDrive,
+ * ktory momentalne nie je pripojeny/synchronizovany, cesta nemusi na disku
+ * existovat - natívny dialóg by na nej hlásil "Súbor sa nenašiel".
+ */
+function documentsDir(): string {
+  const dir = app.getPath("documents");
+  return fs.existsSync(dir) ? dir : userData;
+}
+
 function serverLogPath() {
   return path.join(logsDir, "server.log");
 }
@@ -202,7 +212,7 @@ async function backupData() {
   const stamp = new Date().toISOString().slice(0, 10);
   const { canceled, filePath } = await dialog.showSaveDialog(win!, {
     title: "Uložiť zálohu",
-    defaultPath: path.join(app.getPath("documents"), `HardwareForge-zaloha-${stamp}.zip`),
+    defaultPath: path.join(documentsDir(), `HardwareForge-zaloha-${stamp}.zip`),
     filters: [{ name: "Záloha HardwareForge", extensions: ["zip"] }],
   });
   if (canceled || !filePath) return;
@@ -309,7 +319,7 @@ async function savePdfBuffer(e: IpcMainInvokeEvent, name: unknown, pdf: () => Pr
   const win = BrowserWindow.fromWebContents(e.sender) ?? undefined;
   const { canceled, filePath } = await dialog.showSaveDialog(win!, {
     title: "Uložiť PDF",
-    defaultPath: path.join(app.getPath("documents"), safeFileName(name, "pdf")),
+    defaultPath: path.join(documentsDir(), safeFileName(name, "pdf")),
     filters: [{ name: "PDF", extensions: ["pdf"] }],
   });
   if (canceled || !filePath) return false;

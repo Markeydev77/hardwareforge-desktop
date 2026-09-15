@@ -97,6 +97,7 @@ export async function createBackup(o: {
     }
     zip.end();
 
+    await fsp.mkdir(path.dirname(o.target), { recursive: true });
     await pipeline(zip.outputStream, fs.createWriteStream(partial));
     await fsp.rename(partial, o.target);
   } finally {
